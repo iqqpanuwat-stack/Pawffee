@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Pawffee — สั่งเมนู</title>
+<style>
+:root{
+  --cream:#FFF8F0;
+  --bg:#F3E4D2;
+  --brown-dark:#5C3A21;
+  --brown:#8B5E34;
+  --tan:#D9A26C;
+  --accent:#C97B3D;
+  --line:#E6D2B8;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--brown-dark);
+}
+header{
+  background:var(--cream);
+  padding:28px 20px 18px;
+  text-align:center;
+  border-bottom:3px dashed var(--line);
+  position:relative;
+}
+header h1{
+  font-size:42px;
+  margin:0;
+  color:var(--brown-dark);
+  letter-spacing:1px;
+}
+header h1 span{ color:var(--accent); }
+header p{
+  margin:6px 0 0;
+  color:var(--brown);
+  font-size:14px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+.wrap{
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px 20px 120px;
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  gap:24px;
+}
+@media (max-width:800px){
+  .wrap{ grid-template-columns:1fr; padding-bottom:200px; }
+}
+.menu-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap:18px;
+}
+.card{
+  background:var(--cream);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 4px 10px rgba(92,58,33,0.10);
+  display:flex;
+  flex-direction:column;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 18px rgba(92,58,33,0.16);
+}
+.card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+}
+.card-body{
+  padding:14px 14px 16px;
+  display:flex;
+  flex-direction:column;
+  flex:1;
+}
+.card-body h3{
+  margin:0 0 6px;
+  font-size:17px;
+}
+.card-body p.desc{
+  margin:0 0 10px;
+  font-size:13px;
+  color:#7a5a3d;
+  flex:1;
+  line-height:1.4;
+}
+.price{
+  font-weight:700;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+.add-btn{
+  border:none;
+  background:var(--brown-dark);
+  color:var(--cream);
+  padding:9px 0;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  transition:background .15s ease;
+}
+.add-btn:hover{ background:var(--accent); }
+.add-btn:active{ transform:scale(0.97); }
+
+/* Cart panel */
+.cart-panel{
+  background:var(--cream);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 4px 10px rgba(92,58,33,0.10);
+  align-self:start;
+  position:sticky;
+  top:20px;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+}
+.cart-panel h2{
+  margin:0 0 12px;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+#cart-items{
+  flex:1;
+  overflow-y:auto;
+  margin-bottom:10px;
+}
+.empty-cart{
+  color:#a98a6a;
+  font-size:14px;
+  text-align:center;
+  padding:30px 0;
+}
+.cart-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.cart-row .name{ flex:1; }
+.cart-row .qty-controls{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.qty-btn{
+  width:22px;height:22px;
+  border-radius:50%;
+  border:1px solid var(--brown);
+  background:transparent;
+  color:var(--brown-dark);
+  cursor:pointer;
+  font-size:14px;
+  line-height:1;
+}
+.qty-btn:hover{ background:var(--tan); }
+.line-total{
+  width:60px;
+  text-align:right;
+  font-weight:600;
+}
+.remove-x{
+  cursor:pointer;
+  color:#b85c38;
+  font-size:14px;
+  padding-left:4px;
+}
+.cart-total{
+  display:flex;
+  justify-content:space-between;
+  font-size:17px;
+  font-weight:700;
+  border-top:2px dashed var(--line);
+  padding-top:10px;
+  margin-bottom:12px;
+}
+.confirm-btn{
+  width:100%;
+  padding:12px 0;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:white;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.confirm-btn:hover{ background:#a85f2a; }
+.confirm-btn:disabled{
+  background:#d8c2a6;
+  cursor:not-allowed;
+}
+
+/* Mobile floating cart bar */
+.mobile-bar{
+  display:none;
+  position:fixed;
+  bottom:0; left:0; right:0;
+  background:var(--brown-dark);
+  color:var(--cream);
+  padding:14px 20px;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:700;
+  z-index:50;
+}
+.mobile-bar button{
+  background:var(--accent);
+  border:none;
+  color:white;
+  padding:8px 16px;
+  border-radius:10px;
+  font-weight:700;
+}
+@media (max-width:800px){
+  .cart-panel{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    top:auto;
+    max-height:70vh;
+    border-radius:18px 18px 0 0;
+    transform:translateY(100%);
+    transition:transform .25s ease;
+    z-index:60;
+  }
+  .cart-panel.open{ transform:translateY(0); }
+  .mobile-bar{ display:flex; }
+}
+
+/* Confirmation modal */
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(92,58,33,0.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.modal-overlay.show{ display:flex; }
+.modal-box{
+  background:var(--cream);
+  border-radius:20px;
+  padding:30px;
+  max-width:360px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-box .paw{ font-size:48px; }
+.modal-box h2{ margin:10px 0 6px; color:var(--brown-dark); }
+.modal-box p{ color:var(--brown); font-size:14px; margin-bottom:18px;}
+.modal-box button{
+  background:var(--brown-dark);
+  color:var(--cream);
+  border:none;
+  padding:10px 26px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+.modal-box button:hover{ background:var(--accent); }
+.close-x{
+  position:absolute;
+  top:8px; right:14px;
+  background:none;
+  border:none;
+  font-size:14px;
+  color:var(--brown);
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Paw<span>ffee</span> 🐾</h1>
+  <p>Every Sip, Every Wag</p>
+</header>
+
+<div class="wrap">
+  <div class="menu-grid" id="menu-grid"></div>
+
+  <div class="cart-panel" id="cart-panel">
+    <button class="close-x" id="close-cart" style="display:none;">ปิด ✕</button>
+    <h2>🧺 ตะกร้าของคุณ</h2>
+    <div id="cart-items"><div class="empty-cart">ยังไม่มีรายการในตะกร้า</div></div>
+    <div class="cart-total">
+      <span>ยอดรวม</span>
+      <span id="cart-total-amount">0 บาท</span>
+    </div>
+    <button class="confirm-btn" id="confirm-btn" disabled>ยืนยันคำสั่งซื้อ</button>
+  </div>
+</div>
+
+<div class="mobile-bar" id="mobile-bar">
+  <span id="mobile-summary">ตะกร้า: 0 รายการ · 0 บาท</span>
+  <button id="open-cart-btn">ดูตะกร้า</button>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <div class="paw">🐾✅</div>
+    <h2>ยืนยันคำสั่งซื้อเรียบร้อย!</h2>
+    <p id="modal-detail">ขอบคุณที่อุดหนุน Pawffee น้องหมาขอกระดิกหางให้คุณ!</p>
+    <button id="modal-close">ปิด</button>
+  </div>
+</div>
+
+<script>
+const MENU = [
+  {id:1, name:"Caramel Latte", emoji:"☕", desc:"ลาเต้หอมคาราเมล รสชาติละมุน เหมาะกับการนั่งชิล", price:95, img:"https://i.postimg.cc/fLbsgLwz/92556838-74ac-41f0-883f-fe01b8874038.png"},
+  {id:2, name:"Honey Toast", emoji:"🍰", desc:"ขนมปังอบกรอบ เสิร์ฟพร้อมไอศกรีมและน้ำผึ้งแท้", price:145, img:"https://i.postimg.cc/Ghjs9vrX/7c466934-9db7-4417-89e3-87a5c7de6da2.png"},
+  {id:3, name:"Dog Play Zone", emoji:"🐶", desc:"โซนเล่นกับน้องหมาโกลเด้นแสนเป็นมิตรแบบใกล้ชิด", price:0, img:"https://i.postimg.cc/vB1NZQV3/697081c4-5850-49b2-b8e2-a4f264e8e39d.png"},
+  {id:4, name:"Club Sandwich", emoji:"🥪", desc:"แซนด์วิชสูตรพิเศษ เสิร์ฟพร้อมเฟรนช์ฟรายส์", price:129, img:"https://i.postimg.cc/j2tPkctg/094c2966-e404-458f-9b2f-599bb10fe42c.png"},
+  {id:5, name:"Matcha Green Tea", emoji:"🍵", desc:"มัทฉะเข้มข้น หอมกลิ่นชาเขียวแท้ สดชื่นทุกคำ", price:90, img:"https://i.postimg.cc/WbthpCWq/70ed45b7-c8f1-4e01-a7b8-9172947809e0.png"},
+  {id:6, name:"Butter Croissant", emoji:"🥐", desc:"ครัวซองต์เนยสด กรอบนอกนุ่มใน หอมเนยเต็มคำ", price:75, img:"https://i.postimg.cc/g2WjyjcN/7e314898-dd8b-484e-9e4d-b42a423e65d0.png"},
+  {id:7, name:"Strawberry Milk", emoji:"🍓", desc:"นมสดสตรอว์เบอร์รี หวานหอม สดชื่น ดื่มง่าย", price:80, img:"https://i.postimg.cc/Prq2Xfny/83d1aaac-85d1-4ac5-8322-12a4aa015484.png"},
+  {id:8, name:"Paw Cookie", emoji:"🍪", desc:"คุกกี้รูปอุ้งเท้า หอมกรอบ น่ารักเป็นเอกลักษณ์ของร้าน", price:50, img:"https://i.postimg.cc/d0R8RgKT/5a3c359e-f289-4b36-a0c4-ff1158835afb.png"},
+  {id:9, name:"Cheesecake", emoji:"🍰", desc:"ชีสเค้กเนื้อนุ่มละลายในปาก รสชาติกลมกล่อม", price:110, img:"https://i.postimg.cc/8kYrvTr4/e94a3385-c054-4266-af14-d0a32af3a9d7.png"},
+  {id:10, name:"Iced Americano", emoji:"🥤", desc:"กาแฟดำเย็น รสเข้ม สดชื่น เหมาะสำหรับสายกาแฟแท้", price:65, img:"https://i.postimg.cc/4dX8hh2t/addf66ad-5c52-4248-a72f-22359406b2a6.png"},
+];
+
+let cart = {}; // id -> qty
+
+const grid = document.getElementById('menu-grid');
+MENU.forEach(item=>{
+  const card = document.createElement('div');
+  card.className='card';
+  card.innerHTML = `
+    <img src="${item.img}" alt="${item.name}">
+    <div class="card-body">
+      <h3>${item.emoji} ${item.name}</h3>
+      <p class="desc">${item.desc}</p>
+      <p class="price">${item.price===0?'ฟรี':item.price+' บาท'}</p>
+      <button class="add-btn" data-id="${item.id}">+ ใส่ตะกร้า</button>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+grid.addEventListener('click', e=>{
+  if(e.target.classList.contains('add-btn')){
+    const id = e.target.getAttribute('data-id');
+    cart[id] = (cart[id]||0) + 1;
+    renderCart();
+    const btn = e.target;
+    btn.textContent = '✓ เพิ่มแล้ว';
+    setTimeout(()=>{ btn.textContent = '+ ใส่ตะกร้า'; }, 700);
+  }
+});
+
+function renderCart(){
+  const container = document.getElementById('cart-items');
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  let total = 0, count = 0;
+
+  if(ids.length===0){
+    container.innerHTML = '<div class="empty-cart">ยังไม่มีรายการในตะกร้า</div>';
+  } else {
+    container.innerHTML = '';
+    ids.forEach(id=>{
+      const item = MENU.find(m=>m.id==id);
+      const qty = cart[id];
+      const lineTotal = item.price * qty;
+      total += lineTotal;
+      count += qty;
+      const row = document.createElement('div');
+      row.className='cart-row';
+      row.innerHTML = `
+        <span class="name">${item.emoji} ${item.name}</span>
+        <div class="qty-controls">
+          <button class="qty-btn" data-id="${id}" data-action="dec">−</button>
+          <span>${qty}</span>
+          <button class="qty-btn" data-id="${id}" data-action="inc">+</button>
+        </div>
+        <span class="line-total">${lineTotal} บ.</span>
+        <span class="remove-x" data-id="${id}" data-action="remove">✕</span>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  document.getElementById('cart-total-amount').textContent = total + ' บาท';
+  document.getElementById('mobile-summary').textContent = `ตะกร้า: ${count} รายการ · ${total} บาท`;
+  document.getElementById('confirm-btn').disabled = ids.length===0;
+}
+
+document.getElementById('cart-items').addEventListener('click', e=>{
+  const action = e.target.getAttribute('data-action');
+  const id = e.target.getAttribute('data-id');
+  if(!action) return;
+  if(action==='inc') cart[id]++;
+  if(action==='dec'){ cart[id]--; if(cart[id]<=0) delete cart[id]; }
+  if(action==='remove') delete cart[id];
+  renderCart();
+});
+
+document.getElementById('confirm-btn').addEventListener('click', ()=>{
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  if(ids.length===0) return;
+  let total = 0, count=0;
+  ids.forEach(id=>{
+    const item = MENU.find(m=>m.id==id);
+    total += item.price*cart[id];
+    count += cart[id];
+  });
+  document.getElementById('modal-detail').textContent =
+    `คำสั่งซื้อ ${count} รายการ รวม ${total} บาท เรียบร้อยแล้ว ขอบคุณที่อุดหนุน Pawffee 🐾`;
+  document.getElementById('modal-overlay').classList.add('show');
+  cart = {};
+  renderCart();
+  document.getElementById('cart-panel').classList.remove('open');
+});
+
+document.getElementById('modal-close').addEventListener('click', ()=>{
+  document.getElementById('modal-overlay').classList.remove('show');
+});
+
+// mobile cart toggle
+document.getElementById('open-cart-btn').addEventListener('click', ()=>{
+  document.getElementById('cart-panel').classList.add('open');
+  document.getElementById('close-cart').style.display='block';
+});
+document.getElementById('close-cart').addEventListener('click', ()=>{
+  document.getElementById('cart-panel').classList.remove('open');
+});
+
+renderCart();
+</script>
+
+</body>
+</html>

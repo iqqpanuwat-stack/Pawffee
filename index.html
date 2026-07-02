@@ -394,8 +394,40 @@ function renderCart(){
     });
   }
 
-  document.getElementById('cart-total-amount').textContent = total + ' บาท';
-  document.getElementById('mobile-summary').textContent = `ตะกร้า: ${count} รายการ · ${total} บาท`;
+  // ===== โปรโมชั่น =====
+  let discount = 0;
+
+  // Coffee Time (Caramel Latte + Butter Croissant) = 195
+  discount += Math.min(cart[1]||0, cart[6]||0) * (95+75-195);
+
+  // Berry Sweet (Strawberry Milk + Cheesecake) = 215
+  discount += Math.min(cart[7]||0, cart[9]||0) * (80+110-215);
+
+  // Sandwich Set (Club Sandwich + Iced Americano) = 195
+  discount += Math.min(cart[4]||0, cart[10]||0) * (129+65-195);
+
+  // Paw Cookies Set (Paw Cookie + Matcha Green Tea) = 195
+  discount += Math.min(cart[8]||0, cart[5]||0) * (50+90-195);
+
+  // Happy Pawffect Set (Croissant + Strawberry Milk + Cheesecake + Club Sandwich + Matcha) = 595
+  discount += Math.min(
+    cart[6]||0,
+    cart[7]||0,
+    cart[9]||0,
+    cart[4]||0,
+    cart[5]||0
+  ) * (75+80+110+129+90-595);
+
+  const finalTotal = total - discount;
+
+  document.getElementById('cart-total-amount').innerHTML =
+    `รวม ${total} บาท <br>
+     <span style="color:#b85c38;">ส่วนลด ${discount} บาท</span><br>
+     สุทธิ ${finalTotal} บาท`;
+
+  document.getElementById('mobile-summary').textContent =
+    `ตะกร้า: ${count} รายการ · ${finalTotal} บาท`;
+
   document.getElementById('confirm-btn').disabled = ids.length===0;
 }
 
